@@ -4,6 +4,7 @@ version = "0.1.0"
 authors = ["huangjj27"]
 edition = "2018"
 license = "GPL-3.0-or-later"
+descrption = "a simple Reservoir sampling algorithm that provides equal probability to each position when samples are less then the reservoir's size."
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
