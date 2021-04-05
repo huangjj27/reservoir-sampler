@@ -1,0 +1,80 @@
+name: Continuous Integration
+
+on:
+  pull_request:
+    branches:
+      - dev
+      - master
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  format:
+    if: github.event_name != 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+          default: true
+      - uses: Swatinem/rust-cache@v1
+      - name: fmt
+        uses: actions-rs/cargo@v1
+        with:
+          command: fmt
+          args: -- --check
+
+  check:
+    if: github.event_name != 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+          default: true
+      - uses: Swatinem/rust-cache@v1
+      - name: check
+        uses: actions-rs/cargo@v1
+        with:
+          command: check
+
+  build:
+    if: github.event_name != 'workflow_dispatch'
+    needs:
+      - format
+      - check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+          default: true
+      - uses: Swatinem/rust-cache@v1
+      - name: build
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+
+  test:
+    if: github.event_name != 'workflow_dispatch'
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+          default: true
+      - uses: Swatinem/rust-cache@v1
+      - name: test
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
