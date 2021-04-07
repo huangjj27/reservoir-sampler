@@ -13,7 +13,7 @@ trait ReservoirSampler {
     fn samples(&self) -> &[Option<Self::Item>];
 
     /// 锁定采样器结果。这个过程中如果采集到的样本不足，则会再次打乱顺序。
-    fn lock(mut self) -> Vec<Option<Self::Item>>;
+    fn lock(self) -> Vec<Option<Self::Item>>;
 }
 
 pub struct Reservoir<T>{
