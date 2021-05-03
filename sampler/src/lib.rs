@@ -1,73 +1,30 @@
-use rand::random;
+//! This crate only provide a "standard" trait about what a streaming sampler
+//! using the [Reservoir Algorithm] can do. In My opinion, given a `Whole`
+//! consists of a same type of `Item`, the sampler can decide whether it should
+//! sample an item when the item passes through, and no matter when, the sampler
+//! should know which samples it currently holds. When the sampler decided not
+//! to accept any new sample more, it can `lock` the result.
+//!
+//! [Reservoir Algorithm](https://en.wikipedia.org/wiki/Reservoir_sampling)
 
-/// 蓄水池算法采样器
-trait ReservoirSampler {
-    /// 每种采样器只会在一种总体中采样，而总体中所有个体都属于相同类型
+pub trait ReservoirSampler {
+    // Each sampler only processes the same type of items.
     type Item;
 
-    /// 流式采样器无法知道总体数据有多少个样本，因此只逐个处理，并返回是否将样本纳入
-    /// 样本池的结果，以及可能被替换出来的样本
-    fn sample(&mut self, it: Self::Item) -> (bool, Option<Self::Item>);
+    /// A sampler processes exactly one item each time, for the items come in as
+    /// a stream.
+    ///
+    /// ## Return
+    /// the `sample` function return a tuple contains 3 elements:
+    /// - a `usize` stands for what random number the current item gets
+    /// - a `usize` stands for how many items has been passed through so far
+    /// - an option of item that is replaced by the current item.
+    fn sample(&mut self, it: Self::Item) -> (usize, usize, Option<Self::Item>);
 
-    /// 任意时候应当知道当前蓄水池的状态。如果蓄水池未满，使用 `None` 来填充
+    /// A reservoir should know which items are held no matter if the sampling
+    /// process is finished.
     fn samples(&self) -> &[Option<Self::Item>];
 
-    /// 锁定采样器结果。这个过程中如果采集到的样本不足，则会再次打乱顺序。
+    /// End the sampling process. Shuffling the order of the result is allowed.
     fn lock(self) -> Vec<Option<Self::Item>>;
-}
-
-pub struct Reservoir<T>{
-    total: usize,
-    pool: Vec<Option<T>>,
-}
-
-impl<T: Clone> Reservoir<T> {
-    pub fn with_capacity(n: usize) -> Self {
-        Self {
-            total: 0,
-            pool: vec![None; n],
-        }
-    }
-}
-
-impl<T> ReservoirSampler for Reservoir<T> {
-    type Item = T;
-
-    fn sample(&mut self, it: Self::Item) -> (bool, Option<Self::Item>) {
-        let pool_cap = self.pool.capacity();
-
-        self.total += 1;
-
-        // 概率渐小的随机替换
-        let r = random::<usize>() % self.total + 1;
-        let mut replaced = None;
-        if r <= pool_cap {
-            replaced = self.pool[r - 1].take();
-            self.pool[r - 1] = Some(it);
-        }
-
-        if self.total <= pool_cap && r < self.total {
-            self.pool[self.total - 1] = replaced.take();
-        }
-
-        (r <= pool_cap, replaced)
-    }
-
-    fn samples(&self) -> &[Option<Self::Item>] {
-        &self.pool[..]
-    }
-
-    fn lock(mut self) -> Vec<Option<Self::Item>> {
-        let mut i = self.total;
-        while i < self.pool.capacity() {
-            i += 1;
-
-            let r = random::<usize>() % i + 1;
-            if r <= self.pool.capacity() {
-                self.pool[i - 1] = self.pool[r - 1].take();
-            }
-        }
-
-        self.pool
-    }
 }
