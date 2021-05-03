@@ -7,7 +7,7 @@
 //!
 //! [Reservoir Algorithm](https://en.wikipedia.org/wiki/Reservoir_sampling)
 
-trait ReservoirSampler {
+pub trait ReservoirSampler {
     // Each sampler only processes the same type of items.
     type Item;
 
