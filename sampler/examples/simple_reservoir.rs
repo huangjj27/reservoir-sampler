@@ -1,7 +1,7 @@
-use reservoir_sampler::ReservoirSampler;
 use rand::random;
+use reservoir_sampler::ReservoirSampler;
 
-pub struct Reservoir<T>{
+pub struct Reservoir<T> {
     total: usize,
     pool: Vec<Option<T>>,
 }
