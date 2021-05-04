@@ -32,13 +32,11 @@ jobs:
           override: true
           default: true
       - uses: Swatinem/rust-cache@v1
-      - name: check token
-        run: echo $CRATESIO_TOKEN
       - name: login crates-io
         uses: actions-rs/cargo@v1
         with:
           command: login
-          args: $CRATESIO_TOKEN
+          args: ${{ secrets.CRATESIO_TOKEN }}
       - name: publish onto crates-io
         uses: actions-rs/cargo@v1
         with:
