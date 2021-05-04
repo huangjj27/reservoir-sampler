@@ -1,2 +1,8 @@
 [workspace]
-members = ["sampler"]
+members = [
+    "sampler",
+    "choosen",
+]
+
+[patch.crates-io]
+reservoir-sampler = { path = "./sampler" }
