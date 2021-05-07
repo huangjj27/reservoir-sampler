@@ -1,0 +1,40 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      name:
+        description: 'Person to greet'
+        required: true
+        default: 'huangjj27'
+      home:
+        description: 'location'
+        required: false
+        default: 'The Octoverse'
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  release-sampler:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+          default: true
+      - uses: Swatinem/rust-cache@v1
+      - name: login crates-io
+        uses: actions-rs/cargo@v1
+        with:
+          command: login
+          args: ${{ secrets.CRATESIO_TOKEN }}
+      - name: publish onto crates-io
+        uses: actions-rs/cargo@v1
+        with:
+          command: publish
+          args: --manifest-path sampler/Cargo.toml
