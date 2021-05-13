@@ -69,6 +69,20 @@ impl ChoosenBuilder {
         self
     }
 
+    pub fn remove_position(&mut self, idx: usize) -> &mut Self {
+        self.positions.remove(idx);
+        self
+    }
+
+    pub fn set_position_name(&mut self, name: &str, idx: usize) -> &mut Self {
+        self.positions[idx].name = name.into();
+        self
+    }
+
+    pub fn positions(&self) -> &[Position] {
+        &self.positions
+    }
+
     pub fn build<P: Clone>(&self) -> Choosen<P> {
         let lucky_cap = self.positions.iter().map(|p| p.cap).sum::<usize>();
 
