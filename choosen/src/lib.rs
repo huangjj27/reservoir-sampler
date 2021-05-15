@@ -3,8 +3,8 @@ use reservoir_sampler::{Reservoir, ReservoirSampler};
 mod builder;
 mod pos;
 
+pub use crate::builder::{BuildChoosenError, ChoosenBuilder};
 pub use crate::pos::{Position, PositionType, PositionTypeError};
-pub use crate::builder::{ChoosenBuilder, BuildChoosenError};
 
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub enum ChoosenError {

@@ -31,8 +31,10 @@ where
 
     pub fn add_position(&mut self, name: &str, cap: usize) -> Result<&mut Self, BuildChoosenError> {
         let mut pos = PT::default();
-        pos.set_name(name).map_err(|e| BuildChoosenError::WrongPositionType(e))?;
-        pos.set_cap(cap).map_err(|e| BuildChoosenError::WrongPositionType(e))?;
+        pos.set_name(name)
+            .map_err(|e| BuildChoosenError::WrongPositionType(e))?;
+        pos.set_cap(cap)
+            .map_err(|e| BuildChoosenError::WrongPositionType(e))?;
         self.positions.push(pos);
         Ok(self)
     }
@@ -51,7 +53,9 @@ where
         idx: usize,
     ) -> Result<&mut Self, BuildChoosenError> {
         self.check_idx(idx)?;
-        self.positions[idx].set_name(name).map_err(|e| BuildChoosenError::WrongPositionType(e))?;
+        self.positions[idx]
+            .set_name(name)
+            .map_err(|e| BuildChoosenError::WrongPositionType(e))?;
         Ok(self)
     }
 
@@ -61,7 +65,9 @@ where
         idx: usize,
     ) -> Result<&mut Self, BuildChoosenError> {
         self.check_idx(idx)?;
-        self.positions[idx].set_cap(new_cap).map_err(|e| BuildChoosenError::WrongPositionType(e))?;
+        self.positions[idx]
+            .set_cap(new_cap)
+            .map_err(|e| BuildChoosenError::WrongPositionType(e))?;
         Ok(self)
     }
 
@@ -116,9 +122,7 @@ mod test {
         let result = builder.check_idx(0);
         assert_eq!(result.err(), Some(BuildChoosenError::PositionOutBound(0)));
 
-        let result = builder
-            .add_position("some_pos", 1)?
-            .check_idx(0);
+        let result = builder.add_position("some_pos", 1)?.check_idx(0);
 
         assert_eq!(result, Ok(()));
 
@@ -130,7 +134,12 @@ mod test {
         let mut builder = ChoosenBuilder::<Position>::new();
 
         let result = builder.add_position("", 1);
-        assert_eq!(result.err(), Some(BuildChoosenError::WrongPositionType(PositionTypeError::EmptyName)));
+        assert_eq!(
+            result.err(),
+            Some(BuildChoosenError::WrongPositionType(
+                PositionTypeError::EmptyName
+            ))
+        );
     }
 
     #[test]
@@ -138,15 +147,18 @@ mod test {
         let mut builder = ChoosenBuilder::<Position>::new();
 
         let result = builder.add_position("new_name", 0);
-        assert_eq!(result.err(), Some(BuildChoosenError::WrongPositionType(PositionTypeError::ZeroCapacity)));
+        assert_eq!(
+            result.err(),
+            Some(BuildChoosenError::WrongPositionType(
+                PositionTypeError::ZeroCapacity
+            ))
+        );
     }
 
     #[test]
     fn remove_valid_position() -> Result<(), BuildChoosenError> {
         let mut builder = ChoosenBuilder::<Position>::new();
-        builder
-            .add_position("pos", 13)?
-            .add_position("pos2", 34)?;
+        builder.add_position("pos", 13)?.add_position("pos2", 34)?;
 
         builder.remove_position(1)?;
         assert_eq!(builder.positions.len(), 1);
@@ -159,9 +171,7 @@ mod test {
     #[test]
     fn remove_invalid_position() -> Result<(), BuildChoosenError> {
         let mut builder = ChoosenBuilder::<Position>::new();
-        let result = builder
-            .add_position("pos", 13)?
-            .remove_position(1);
+        let result = builder.add_position("pos", 13)?.remove_position(1);
 
         assert_eq!(result.err(), Some(BuildChoosenError::PositionOutBound(1)));
 
@@ -196,9 +206,7 @@ mod test {
     #[test]
     fn set_cap() -> Result<(), BuildChoosenError> {
         let mut builder = ChoosenBuilder::<Position>::new();
-        builder
-            .add_position("pos", 13)?
-            .set_position_cap(20, 0)?;
+        builder.add_position("pos", 13)?.set_position_cap(20, 0)?;
 
         assert_eq!(builder.positions.len(), 1);
         assert_eq!(builder.positions[0].name(), "pos");
@@ -210,9 +218,7 @@ mod test {
     #[test]
     fn set_cap_out_boud() -> Result<(), BuildChoosenError> {
         let mut builder = ChoosenBuilder::<Position>::new();
-        let result = builder
-            .add_position("pos", 13)?
-            .set_position_cap(1, 1);
+        let result = builder.add_position("pos", 13)?.set_position_cap(1, 1);
 
         assert_eq!(result.err(), Some(BuildChoosenError::PositionOutBound(1)));
         Ok(())
@@ -221,8 +227,7 @@ mod test {
     #[test]
     fn positions() -> Result<(), BuildChoosenError> {
         let mut builder = ChoosenBuilder::<Position>::new();
-        let result = builder
-            .add_position("some_pos", 4)?;
+        let result = builder.add_position("some_pos", 4)?;
 
         assert_eq!(result.positions().len(), 1);
         assert_eq!(result.positions()[0].name(), "some_pos");
@@ -250,7 +255,7 @@ mod test {
     #[test]
     fn build() -> Result<(), BuildChoosenError> {
         let mut builder = ChoosenBuilder::<Position>::new();
-        let choosen= builder
+        let choosen = builder
             .add_position("some_pos", 1)?
             .remove_position(0)?
             .add_position("another", 7)?
@@ -260,6 +265,5 @@ mod test {
         assert_eq!(choosen.positions[0].cap(), 7);
 
         Ok(())
-
     }
 }
