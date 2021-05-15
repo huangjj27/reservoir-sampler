@@ -2,7 +2,9 @@
 members = [
     "sampler",
     "choosen",
+    # "boss_sponoring",
 ]
 
 [patch.crates-io]
 reservoir-sampler = { path = "./sampler" }
+choosen = { path = "./choosen" }

@@ -16,14 +16,10 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  release-cratesio:
+  release-choosen:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-      matrix:
-        crate:
-          - sampler
-          - choosen
     steps:
       - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
@@ -41,4 +37,4 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: publish
-          args: --manifest-path ${{ matrix.crate }}/Cargo.toml
+          args: --manifest-path choosen/Cargo.toml
