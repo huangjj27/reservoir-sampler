@@ -5,9 +5,10 @@
 //! should know which samples it currently holds. When the sampler decided not
 //! to accept any new sample more, it can `lock` the result.
 //!
-//! [Reservoir Algorithm](https://en.wikipedia.org/wiki/Reservoir_sampling)
+//! [Reservoir Algorithm]: https://en.wikipedia.org/wiki/Reservoir_sampling
 use rand::random;
 
+/// indicates that a type can `sample` `Item`s, output its `samples` and `lock` the sample process.
 pub trait ReservoirSampler {
     /// Each sampler only processes the same type of items.
     type Item;
@@ -30,19 +31,54 @@ pub trait ReservoirSampler {
     fn lock(self) -> Vec<Option<Self::Item>>;
 }
 
+/// A `Reservoir` MUST NOT with zero capacity!
+#[derive(Debug)]
+pub enum Error {
+    ReservoirWithZeroCapacity,
+}
+
 /// A `Reservoir` is a just a pool, but for random number generation, `total`
-/// items' count passed through is known.
+/// items' count passed through is known. NOTE: the element should implemnt `Clone`.
+///
+/// # Example
+///
+/// ```
+/// use reservoir_sampler::{ReservoirSampler, Reservoir};
+///
+/// let mut res: Reservoir<usize> = Reservoir::with_capacity(2).unwrap();
+///
+/// let (r, total, replaced) = res.sample(1);
+/// println!("generated random number: {}, with total {} element(s) passed, replacing {:?}", r, total, replaced);
+/// let (r, total, replaced) = res.sample(2);
+/// println!("generated random number: {}, with total {} element(s) passed, replacing {:?}", r, total, replaced);
+/// ```
 pub struct Reservoir<T> {
     total: usize,
     pool: Vec<Option<T>>,
 }
 
 impl<T: Clone> Reservoir<T> {
-    pub fn with_capacity(n: usize) -> Self {
-        Self {
+    /// When creates a new reservoir, the capacity of the reservoir should always
+    /// be known and keep fixed. Besides, a reservoir with zero capacity is
+    /// entirely useless, and thus MUST NOT be created.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use reservoir_sampler::{ReservoirSampler, Reservoir};
+    ///
+    /// assert!(Reservoir::<usize>::with_capacity(2).is_ok());
+    /// assert!(Reservoir::<usize>::with_capacity(0).is_err());
+    /// ```
+    pub fn with_capacity(n: usize) -> Result<Self, Error> {
+        if n == 0 {
+            return Err(Error::ReservoirWithZeroCapacity);
+        }
+
+        Ok(Self {
             total: 0,
             pool: std::vec::from_elem(Option::<T>::None, n),
-        }
+        })
     }
 }
 
@@ -93,9 +129,14 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test() {
+    fn zero_capacity_should_be_error() {
+        assert!(Reservoir::<usize>::with_capacity(0).is_err());
+    }
+
+    #[test]
+    fn test() -> Result<(), Error> {
         let list = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-        let mut reservoir = Reservoir::<i32>::with_capacity(15);
+        let mut reservoir = Reservoir::<i32>::with_capacity(15)?;
 
         for &it in &list {
             let _ = reservoir.sample(it);
@@ -103,5 +144,7 @@ mod tests {
         }
 
         println!("result: {:?}", reservoir.lock());
+
+        Ok(())
     }
 }
