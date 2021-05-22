@@ -90,7 +90,8 @@ where
 
         Ok(Choosen {
             positions: self.positions.clone(),
-            lucky: Reservoir::<P>::with_capacity(lucky_cap),
+            lucky: Reservoir::<P>::with_capacity(lucky_cap)
+                .expect(&format!("Here is a bug! while we ensure that all positions have a capacity of at least one, we still get a total capacity of zero!")),
         })
     }
 }
